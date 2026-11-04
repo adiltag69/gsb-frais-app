@@ -7,10 +7,13 @@ export default function FraisCard({ frais }) {
         Note [{frais.id_frais}] Visiteur n°{frais.id_visiteur} - {frais.anneemois}
       </Text>
       <Text style={styles.meta}>Nombre de justificatifs : {frais.nbjustificatifs}</Text>
-      <Text style={styles.montant}>
-        Montant validé : {frais.montantvalide ?? ""} €
+      <Text style={frais.montantvalide !== null ? styles.montant : styles.meta}>
+        Montant validé :{" "}
+        {frais.montantvalide !== null
+          ? `${frais.montantvalide.toFixed(2)} €`
+          : "non validé"}
       </Text>
-      <Text style={styles.meta}>Montant saisi : - €</Text>
+      <Text style={styles.meta}>Montant saisi : —</Text>
     </View>
   );
 }
