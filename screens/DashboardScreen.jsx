@@ -39,7 +39,7 @@ export default function DashboardScreen() {
     <View style={styles.screen}>
       <Navbar />
       <View style={styles.content}>
-        <Text>Bienvenue {user}</Text>
+        <Text>Bienvenue {user?.prenom_visiteur}</Text>
         <TextInput
           placeholder="Rechercher par année-mois ou ID visiteur..."
           value={searchTerm}

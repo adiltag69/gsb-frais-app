@@ -19,12 +19,16 @@ export default function LoginScreen() {
   const navigation = useNavigation();
   
   // 4. Déclaration de la fonction handleSubmit
-  const handleSubmit = () => {
-    // Appel de la fonction loginUser avec login et password
+  const handleSubmit = async () => {
     // Pas besoin de naviguer manuellement : App.js bascule automatiquement
-    // vers Dashboard dès que le contexte "user" est mis à jour.
-    if (!loginUser(login, password)) {
-      Alert.alert("Identifiants incorrects"); // Affiche une erreur si échec
+    // dès que le contexte "user" est mis à jour.
+    try {
+      const data = await loginUser(login, password);
+      if (!data.token) {
+        Alert.alert("Identifiants incorrects");
+      }
+    } catch (error) {
+      Alert.alert("Erreur de connexion", "Impossible de contacter le serveur");
     }
   };
 

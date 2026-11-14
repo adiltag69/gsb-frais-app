@@ -1,3 +1,4 @@
+import { ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screens/HomeScreen";
@@ -11,7 +12,11 @@ const Stack = createNativeStackNavigator();
 // Composant séparé : nécessaire car useAuth() doit être appelé
 // À L'INTÉRIEUR de <AuthProvider>, pas dans App() qui le pose.
 function AppNavigator() {
-  const { user } = useAuth();
+  const { user, sessionLoading } = useAuth();
+
+  if (sessionLoading) {
+    return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+  }
 
   return (
     <Stack.Navigator>
