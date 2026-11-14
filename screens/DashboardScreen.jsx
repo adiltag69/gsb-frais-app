@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, Switch } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import fraisData from "../data/frais.json";
+import { API_URL } from "../services/authService";
 import FraisCard from "../components/FraisCard";
 
 export default function DashboardScreen() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [fraisList, setFraisList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,11 +14,23 @@ export default function DashboardScreen() {
   const [montantMin, setMontantMin] = useState("");
 
   useEffect(() => {
-    // Simulation d'un appel API avec un délai de 500 ms
-    setTimeout(() => {
-      setFraisList(fraisData);
-      setLoading(false);
-    }, 500);
+    const fetchFrais = async () => {
+      try {
+        const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        setFraisList(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des frais : ", error);
+        setLoading(false);
+      }
+    };
+    fetchFrais();
   }, []);
 
   // Logique de filtrage : filtre les frais en fonction du terme de recherche
