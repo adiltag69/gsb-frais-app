@@ -1,36 +1,40 @@
 import { useState, useCallback } from "react";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TextInput, Switch, Alert, Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAuth } from "../context/AuthContext";
-import Navbar from "../components/Navbar";
-import { API_URL } from "../config";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  Switch,
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
+  Platform
+} from "react-native";
 import FraisCard from "../components/FraisCard";
+import Navbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { getFraisList, deleteFrais } from "../services/fraisService";
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ navigation }) {
   const { user, token } = useAuth();
   const [fraisList, setFraisList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterNonNull, setFilterNonNull] = useState(true);
   const [montantMin, setMontantMin] = useState("");
-  const navigation = useNavigation();
+  const [error, setError] = useState("");
 
   useFocusEffect(
     useCallback(() => {
       const fetchFrais = async () => {
         try {
-          const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!response.ok) {
-            throw new Error(`Erreur HTTP ${response.status}`);
-          }
-          const data = await response.json();
-          setFraisList(data);
-          setLoading(false);
-        } catch (error) {
-          console.error("Erreur lors de la récupération des frais : ", error);
+          setFraisList(await getFraisList(user.id_visiteur, token));
+          setError("");
+        } catch (err) {
+          console.error("Erreur lors de la récupération des frais :", err);
+          setError(err.message);
+        } finally {
           setLoading(false);
         }
       };
@@ -42,28 +46,19 @@ export default function DashboardScreen() {
     navigation.navigate("FraisEdit", { id });
   };
 
-  const supprimerFrais = async (id) => {
+  async function removeFrais(id) {
     try {
-      const token = await AsyncStorage.getItem("token");
-      const response = await fetch(`${API_URL}frais/suppr`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ id_frais: id }),
-      });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Erreur HTTP ${response.status}`);
-      }
-      setFraisList((liste) => liste.filter((f) => f.id_frais !== id));
+      await deleteFrais(id, token);
+      setFraisList((prev) => prev.filter((f) => f.id_frais !== id));
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error);
+      Alert.alert("Erreur lors de la suppression :", error.message);
     }
-  };
+  }
 
   const handleDelete = (id) => {
     if (Platform.OS === "web") {
       if (window.confirm("Êtes-vous sûr de vouloir supprimer cette note de frais ?")) {
-        supprimerFrais(id);
+        removeFrais(id);
       }
       return;
     }
@@ -75,7 +70,7 @@ export default function DashboardScreen() {
         {
           text: "Supprimer",
           style: "destructive",
-          onPress: () => supprimerFrais(id),
+          onPress: () => removeFrais(id),
         },
       ]
     );
@@ -120,6 +115,7 @@ export default function DashboardScreen() {
           style={styles.searchInput}
         />
       </View>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <FlatList
         data={filteredFrais}
         keyExtractor={(item) => item.id_frais.toString()}
@@ -145,6 +141,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 12,
+  },
+  error: {
+    color: "red",
+    marginBottom: 12,
   },
   filterText: {
     flex: 1,
