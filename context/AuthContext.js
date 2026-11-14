@@ -12,7 +12,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [sessionLoading, setSessionLoading] = useState(true);
 
-  // Restaure user et token au lancement de l'application
   useEffect(() => {
     const restoreSession = async () => {
       try {
@@ -31,7 +30,7 @@ export function AuthProvider({ children }) {
     restoreSession();
   }, []);
 
-  // 3. Fonction de connexion (appel à l'API)
+  // 3. Fonction de connexion
   async function loginUser(login, password) {
     const data = await signIn(login, password);
     setUser(data.visiteur);

@@ -1,5 +1,3 @@
-// Fausse API locale qui imite l'API GSB du lycée, pour tester l'app hors du réseau du lycée.
-// Lancement : node mock-api/server.js
 const http = require("http");
 
 const PORT = 3000;
@@ -22,7 +20,6 @@ function send(res, status, body) {
   console.log("  ->", status, res.req.socket.remoteAddress);
   res.writeHead(status, {
     "Content-Type": "application/json",
-    // CORS : nécessaire pour tester depuis le navigateur (touche w)
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -35,7 +32,6 @@ http
     console.log(req.method, req.url);
     if (req.method === "OPTIONS") return send(res, 204, {});
 
-    // POST /api/visiteur/auth  { login, pwd }
     if (req.method === "POST" && req.url === "/api/visiteur/auth") {
       let raw = "";
       req.on("data", (chunk) => (raw += chunk));
@@ -51,7 +47,6 @@ http
       return;
     }
 
-    // GET /api/frais/liste/:id_visiteur  (header Authorization: Bearer <token>)
     const match = req.url.match(/^\/api\/frais\/liste\/(\d+)$/);
     if (req.method === "GET" && match) {
       if (req.headers.authorization !== `Bearer ${TOKEN}`) {

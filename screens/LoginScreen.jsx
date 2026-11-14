@@ -21,7 +21,7 @@ export default function LoginScreen() {
   // 4. Déclaration de la fonction handleSubmit
   const handleSubmit = async () => {
     // Pas besoin de naviguer manuellement : App.js bascule automatiquement
-    // dès que le contexte "user" est mis à jour.
+    // vers Dashboard dès que le contexte "user" est mis à jour.
     try {
       const data = await loginUser(login, password);
       if (!data.token) {
