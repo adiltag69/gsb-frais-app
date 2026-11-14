@@ -1,9 +1,13 @@
-import { View, Text, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import fraisData from "../data/frais.json";
+import FraisCard from "../components/FraisCard";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
+  const [fraisList, setFraisList] = useState([]);
 
   return (
     <View style={styles.screen}>
@@ -11,6 +15,12 @@ export default function DashboardScreen() {
       <View style={styles.content}>
         <Text>Bienvenue {user}</Text>
       </View>
+      <FlatList
+        data={fraisList}
+        keyExtractor={(item) => item.id_frais.toString()}
+        renderItem={({ item }) => <FraisCard frais={item} />}
+        contentContainerStyle={styles.content}
+      />
     </View>
   );
 }
